@@ -246,3 +246,58 @@ El **DbContext** es la clase principal de **Entity Framework** (el ORM de .NET).
 * **Función:** Por defecto, los navegadores bloquean peticiones entre sitios diferentes (ej: tu frontend está en `localhost:3000` y tu API en `localhost:5000`). Configurar CORS permite decirle al navegador: "Es seguro que este sitio A pida datos a este sitio B".
 
 ---
+
+---
+
+### Análisis general del proyecto
+
+Escuchify es una aplicación web Full-Stack desarrollada sobre la plataforma .NET, diseñada para la gestión de una biblioteca musical con Artistas, Discos y Canciones. El proyecto se destaca por utilizar una arquitectura moderna que separa claramente las responsabilidades entre el cliente (Frontend) y el servidor (Backend), compartiendo lógica de negocios a través de una librería común.
+
+#### 1\. Arquitectura de solución limpia y profesional
+
+Lo primero que debemos destacar es que no escribimos todo el código en una sola carpeta desordenada. Se adopto una arquitectura de 3 capas dentro de una solución de .NET para mantener el orden y la escalabilidad:
+
+1. **API (Backend):** es el cerebro, maneja la lógica, se conecta a la base de datos y expone los datos mediante endpoints HTTP.
+
+2. **Client (Frontend):** es la cara visible, está hecho con Blazor WebAssembly, lo que permite ejecutar código C# directamente en el navegador del usuario en lugar de JavaScript.
+
+3. **Shared (Biblioteca de Clases):** es el punto de unión, aquí se guardan los modelos de Artistas, Discos, Canciones.
+
+Creando este proyecto Shared evita la duplicacion de código. Tanto la API como el Cliente usan exactamente las mismas clases, garantizando que si cambiamos un dato en el servidor, el cliente se actualiza automáticamente.
+
+#### 2\. Modelo de Datos Relacional - Entity Framework Core
+
+Para la base de datos, utilizamos el enfoque Code-First de Entity Framework Core. Esto significa que, en lugar de diseñar tablas con SQL manualmente, se definio la estructura usando código C#. El proceso fue el siguiente:
+
+1. **Modelado de clases:** primero se crearon las clases Artista, Disco y Cancion en el proyecto Shared. Estas clases representan las tablas y sus propiedades se convierten automáticamente en las columnas.
+2. **El contexto de datos:** se realizo la configuracion de ApplicationDbContext que hereda de Entity Framework. Esta clase actúa como un intermediario, exponiendo los modelos como colecciones que la aplicación puede consultar y modificar.
+3. **Migraciones:** finalmente, se utilizaron comandos de la terminal para que Entity Framework tradujera el código C# a instrucciones SQL reales, generando automáticamente el archivo de base de datos SQLite (musica.db) con todas sus tablas y relaciones listas para usar."
+
+Contamos con un modelo relacional claro:
+
+* Un **Artista** tiene muchos **Discos** (Relación 1 a N).
+* Un **Disco** tiene muchas **Canciones** (Relación 1 a N).
+
+Para optimizar el modelo de datos, se utilizaron dos atributos claves:
+
+[JsonIgnore] (Control de serializacion): se aplico en las listas de relación para evitar referencias circulares. Esto impide que la aplicación entre en un bucle infinito al convertir los datos a JSON (ej: Artista trae Discos -> Disco trae Artista -> Artista trae Discos...), lo cual bloquearía la API.
+
+[NotMapped] (Propiedades calculadas): se utiliza para campos como CantidadDiscos. Esto permite calcular valores en memoria sin necesidad de guardar y mantener columnas redundantes en la base de datos, manteniéndola más ligera.
+
+#### 3\. Tecnología de Base de Datos - SQLite
+
+Se utilizo SQLite por ser una base de datos ligera que no requiere instalar un servidor complejo, lo cual es ideal para el desarrollo y la portabilidad del proyecto. Esto se configura fácilmente mediante el ApplicationDbContext y la cadena de conexión en appsettings.json.
+
+#### 4\. Comunicación Segura - CORS
+
+Un punto técnico fuerte es explicar el CORS (Intercambio de Recursos de Origen Cruzado).
+
+Por seguridad, los navegadores bloquean peticiones entre diferentes "orígenes", la API y el Cliente corren en puertos distintos. Para ello, se configuro una política en el Program.cs de la API para permitir explícitamente que el Frontend consuma los datos del Backend de manera segura.
+
+#### 5\. Conceptos Aprendidos
+
+1. **Blazor WebAssembly:** permite crear SPAs (Single Page Applications) interactivas usando C#.
+2. **API RESTful:** actúa como el intermediario que lleva las peticiones del usuario a la base de datos y devuelve la respuesta.
+3. **ORM (Entity Framework):** te permite trabajar con la base de datos usando objetos de C# en lugar de escribir SQL puro.
+
+---

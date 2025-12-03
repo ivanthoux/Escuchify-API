@@ -9,6 +9,33 @@
         <h2 class="fw-bold" style="color: var(--primary-color);">Gestión de Discos</h2>
     </div>
 
+    <!-- Filtros -->
+    <div class="glass-card mb-4 p-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control border-start-0" placeholder="Buscar por nombre de disco..." @bind="FiltroNombre" @bind:event="oninput" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-person-badge"></i></span>
+                    <select class="form-select border-start-0" @bind="FiltroArtistaId">
+                        <option value="0">-- Todos los Artistas --</option>
+                        @if (listaArtistas != null)
+                        {
+                            foreach (var artista in listaArtistas)
+                            {
+                                <option value="@artista.Id">@artista.NombreArtistico</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-4 mb-4">
             <div class="glass-card h-100">
@@ -80,7 +107,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var disco in listaDiscos)
+                            @foreach (var disco in DiscosFiltrados)
                             {
                                 <tr>
                                     <td class="ps-4 fw-bold">@disco.Nombre</td>
@@ -107,6 +134,22 @@
     private List<Artista>? listaArtistas; // Necesario para el dropdown
     private Disco discoEnEdicion = new Disco();
     private bool mostrarErrorArtista = false;
+
+    // Filtros
+    private string FiltroNombre { get; set; } = "";
+    private int FiltroArtistaId { get; set; } = 0;
+
+    private IEnumerable<Disco> DiscosFiltrados
+    {
+        get
+        {
+            if (listaDiscos == null) return Enumerable.Empty<Disco>();
+
+            return listaDiscos
+                .Where(d => string.IsNullOrEmpty(FiltroNombre) || d.Nombre.Contains(FiltroNombre, StringComparison.OrdinalIgnoreCase))
+                .Where(d => FiltroArtistaId == 0 || d.ArtistaId == FiltroArtistaId);
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

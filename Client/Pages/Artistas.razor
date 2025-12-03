@@ -9,6 +9,24 @@
         <h2 class="fw-bold" style="color: var(--primary-color);">Gestión de Artistas</h2>
     </div>
 
+    <!-- Filtros -->
+    <div class="glass-card mb-4 p-3">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control border-start-0" placeholder="Buscar por nombre..." @bind="FiltroNombre" @bind:event="oninput" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-flag"></i></span>
+                    <input type="text" class="form-control border-start-0" placeholder="Filtrar por nacionalidad..." @bind="FiltroNacionalidad" @bind:event="oninput" />
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="glass-card mb-5">
         <div class="card-header bg-transparent border-bottom-0 fw-bold text-uppercase" style="color: var(--primary-color);">
             @(artistaEnEdicion.Id == 0 ? "Nuevo Artista" : "Editar Artista")
@@ -80,7 +98,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var artista in listaArtistas)
+                    @foreach (var artista in ArtistasFiltrados)
                     {
                         <tr>
                             <td class="ps-4 fw-bold">@artista.NombreArtistico</td>
@@ -105,6 +123,22 @@
 @code {
     private List<Artista>? listaArtistas;
     private Artista artistaEnEdicion = new Artista();
+
+    // Filtros
+    private string FiltroNombre { get; set; } = "";
+    private string FiltroNacionalidad { get; set; } = "";
+
+    private IEnumerable<Artista> ArtistasFiltrados
+    {
+        get
+        {
+            if (listaArtistas == null) return Enumerable.Empty<Artista>();
+
+            return listaArtistas
+                .Where(a => string.IsNullOrEmpty(FiltroNombre) || a.NombreArtistico.Contains(FiltroNombre, StringComparison.OrdinalIgnoreCase))
+                .Where(a => string.IsNullOrEmpty(FiltroNacionalidad) || a.Nacionalidad.Contains(FiltroNacionalidad, StringComparison.OrdinalIgnoreCase));
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

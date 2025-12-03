@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Api\\Api.csproj": {}
+    "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Api\\Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Api\\Api.csproj": {
+    "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Api\\Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Api\\Api.csproj",
+        "projectUniqueName": "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Api\\Api.csproj",
         "projectName": "Api",
-        "projectPath": "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Api\\Api.csproj",
-        "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Api\\obj\\",
+        "projectPath": "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Api\\Api.csproj",
+        "packagesPath": "C:\\Users\\Ivan\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Ivan\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,15 +26,14 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Shared\\Shared.csproj": {
-                "projectPath": "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Shared\\Shared.csproj"
+              "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Shared\\Shared.csproj": {
+                "projectPath": "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Shared\\Shared.csproj"
               }
             }
           }
@@ -517,20 +516,20 @@
         }
       }
     },
-    "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Shared\\Shared.csproj": {
+    "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Shared\\Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Shared\\Shared.csproj",
+        "projectUniqueName": "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Shared\\Shared.csproj",
         "projectName": "Shared",
-        "projectPath": "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Shared\\Shared.csproj",
-        "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\admin\\Desktop\\Proyecto Escuchify\\Shared\\obj\\",
+        "projectPath": "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Shared\\Shared.csproj",
+        "packagesPath": "C:\\Users\\Ivan\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Ivan\\Desktop\\Copia de Escuchify\\Escuchify-API\\Shared\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Ivan\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -539,7 +538,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {

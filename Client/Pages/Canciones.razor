@@ -1,0 +1,144 @@
+@page "/canciones"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<PageTitle>Escuchify - Canciones</PageTitle>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: var(--primary-color);">Catálogo de Canciones</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="glass-card h-100">
+                <div class="card-header bg-transparent border-bottom-0 fw-bold text-uppercase" style="color: var(--primary-color);">
+                    Nueva Canción
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@nuevaCancion" OnValidSubmit="GuardarCancion">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre Canción</label>
+                            <InputText class="form-control" @bind-Value="nuevaCancion.Nombre" placeholder="Ej. Bohemian Rhapsody" />
+                            <ValidationMessage For="@(() => nuevaCancion.Nombre)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Duración (segundos)</label>
+                            <InputNumber class="form-control" @bind-Value="nuevaCancion.Duracion" />
+                            <ValidationMessage For="@(() => nuevaCancion.Duracion)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Pertenece al Disco</label>
+                            <InputSelect class="form-control" @bind-Value="nuevaCancion.DiscoId">
+                                <option value="0">-- Seleccione Disco --</option>
+                                @if (listaDiscos != null)
+                                {
+                                    foreach (var disco in listaDiscos)
+                                    {
+                                        <option value="@disco.Id">@disco.Nombre</option>
+                                    }
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-2">
+                            <i class="bi bi-plus-circle"></i> Agregar Canción
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            @if (listaCanciones == null)
+            {
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando canciones...</p>
+                </div>
+            }
+            else
+            {
+                <div class="glass-card p-0 overflow-hidden">
+                    <table class="table table-hover mb-0">
+                        <thead style="background-color: var(--secondary-color); color: white;">
+                            <tr>
+                                <th class="ps-4">Nombre</th>
+                                <th>Duración</th>
+                                <th>Disco</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cancion in listaCanciones)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold">@cancion.Nombre</td>
+                                    <td>@cancion.Duracion s</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            @(cancion.Disco?.Nombre ?? "Sin Disco")
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-outline-danger btn-sm" @onclick="() => Eliminar(cancion.Id)" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Cancion>? listaCanciones;
+    private List<Disco>? listaDiscos;
+    private Cancion nuevaCancion = new Cancion();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarListas();
+    }
+
+    private async Task CargarListas()
+    {
+        listaCanciones = await Http.GetFromJsonAsync<List<Cancion>>("api/canciones");
+        listaDiscos = await Http.GetFromJsonAsync<List<Disco>>("api/discos");
+    }
+
+    private async Task GuardarCancion()
+    {
+        if (nuevaCancion.DiscoId == 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Debes seleccionar un disco");
+            return;
+        }
+
+        var res = await Http.PostAsJsonAsync("api/canciones", nuevaCancion);
+        if (res.IsSuccessStatusCode)
+        {
+            await CargarListas();
+            nuevaCancion = new Cancion(); // Reset
+        }
+    }
+
+    private async Task Eliminar(int id)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", "¿Borrar canción?"))
+        {
+            await Http.DeleteAsync($"api/canciones/{id}");
+            await CargarListas();
+        }
+    }
+}

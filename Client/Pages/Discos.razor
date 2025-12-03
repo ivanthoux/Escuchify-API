@@ -1,0 +1,152 @@
+@page "/discos"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<PageTitle>Escuchify - Discos</PageTitle>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: var(--primary-color);">Gestión de Discos</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="glass-card h-100">
+                <div class="card-header bg-transparent border-bottom-0 fw-bold text-uppercase" style="color: var(--primary-color);">
+                    Nuevo Disco
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@discoEnEdicion" OnValidSubmit="GuardarDisco">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre del Disco</label>
+                            <InputText class="form-control" @bind-Value="discoEnEdicion.Nombre" placeholder="Ej. Abbey Road" />
+                            <ValidationMessage For="@(() => discoEnEdicion.Nombre)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Artista</label>
+                            <InputSelect class="form-control" @bind-Value="discoEnEdicion.ArtistaId">
+                                <option value="0">-- Seleccione un Artista --</option>
+                                @if (listaArtistas != null)
+                                {
+                                    foreach (var artista in listaArtistas)
+                                    {
+                                        <option value="@artista.Id">@artista.NombreArtistico</option>
+                                    }
+                                }
+                            </InputSelect>
+                            @if (discoEnEdicion.ArtistaId == 0 && mostrarErrorArtista)
+                            {
+                                <span class="text-danger small">Debe seleccionar un artista</span>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Año Lanzamiento</label>
+                            <InputNumber class="form-control" @bind-Value="discoEnEdicion.AnioLanzamiento" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-2">
+                            <i class="bi bi-disc"></i> Guardar Disco
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            @if (listaDiscos == null)
+            {
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando discos...</p>
+                </div>
+            }
+            else
+            {
+                <div class="glass-card p-0 overflow-hidden">
+                    <table class="table table-hover mb-0">
+                        <thead style="background-color: var(--accent-color); color: white;">
+                            <tr>
+                                <th class="ps-4">Disco</th>
+                                <th>Artista</th>
+                                <th>Año</th>
+                                <th class="text-center">Canciones</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var disco in listaDiscos)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold">@disco.Nombre</td>
+                                    <td>@(disco.Artista?.NombreArtistico ?? "Desconocido")</td>
+                                    <td>@disco.AnioLanzamiento</td>
+                                    <td class="text-center"><span class="badge bg-secondary rounded-pill">@disco.CantidadCanciones</span></td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-outline-danger btn-sm" @onclick="() => EliminarDisco(disco.Id)" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Disco>? listaDiscos;
+    private List<Artista>? listaArtistas; // Necesario para el dropdown
+    private Disco discoEnEdicion = new Disco();
+    private bool mostrarErrorArtista = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        // Cargamos ambas listas
+        listaDiscos = await Http.GetFromJsonAsync<List<Disco>>("api/discos");
+        listaArtistas = await Http.GetFromJsonAsync<List<Artista>>("api/artistas");
+    }
+
+    private async Task GuardarDisco()
+    {
+        if (discoEnEdicion.ArtistaId == 0)
+        {
+            mostrarErrorArtista = true;
+            return;
+        }
+
+        var respuesta = await Http.PostAsJsonAsync("api/discos", discoEnEdicion);
+
+        if (respuesta.IsSuccessStatusCode)
+        {
+            await CargarDatos();
+            discoEnEdicion = new Disco();
+            mostrarErrorArtista = false;
+        }
+        else
+        {
+            var error = await respuesta.Content.ReadAsStringAsync();
+            await JS.InvokeVoidAsync("alert", "Error: " + error);
+        }
+    }
+
+    private async Task EliminarDisco(int id)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "¿Eliminar disco?")) return;
+        await Http.DeleteAsync($"api/discos/{id}");
+        await CargarDatos();
+    }
+}

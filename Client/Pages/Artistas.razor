@@ -1,0 +1,173 @@
+@page "/artistas"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<PageTitle>Escuchify - Artistas</PageTitle>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: var(--primary-color);">Gestión de Artistas</h2>
+    </div>
+
+    <div class="glass-card mb-5">
+        <div class="card-header bg-transparent border-bottom-0 fw-bold text-uppercase" style="color: var(--primary-color);">
+            @(artistaEnEdicion.Id == 0 ? "Nuevo Artista" : "Editar Artista")
+        </div>
+        <div class="card-body">
+            <EditForm Model="@artistaEnEdicion" OnValidSubmit="GuardarArtista">
+                <DataAnnotationsValidator />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre Artístico</label>
+                        <InputText class="form-control" @bind-Value="artistaEnEdicion.NombreArtistico" placeholder="Ej. The Beatles" />
+                        <ValidationMessage For="@(() => artistaEnEdicion.NombreArtistico)" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre Completo</label>
+                        <InputText class="form-control" @bind-Value="artistaEnEdicion.NombreCompleto" placeholder="Ej. John, Paul, George, Ringo" />
+                        <ValidationMessage For="@(() => artistaEnEdicion.NombreCompleto)" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nacionalidad</label>
+                        <InputText class="form-control" @bind-Value="artistaEnEdicion.Nacionalidad" placeholder="Ej. Reino Unido" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Año Inicio</label>
+                        <InputNumber class="form-control" @bind-Value="artistaEnEdicion.AnioInicio" />
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    @if (artistaEnEdicion.Id != 0)
+                    {
+                        <button type="button" class="btn btn-secondary me-2" @onclick="CancelarEdicion">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                    }
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Guardar
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+
+    @if (listaArtistas == null)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Cargando artistas...</p>
+        </div>
+    }
+    else
+    {
+        <div class="glass-card p-0 overflow-hidden">
+            <table class="table table-hover mb-0">
+                <thead style="background-color: var(--primary-color); color: white;">
+                    <tr>
+                        <th class="ps-4">Nombre Artístico</th>
+                        <th>Nacionalidad</th>
+                        <th class="text-center">Discos</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var artista in listaArtistas)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold">@artista.NombreArtistico</td>
+                            <td>@artista.Nacionalidad</td>
+                            <td class="text-center"><span class="badge bg-secondary rounded-pill">@artista.CantidadDiscos</span></td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-outline-warning btn-sm me-1" @onclick="() => CargarParaEdicion(artista)" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => EliminarArtista(artista.Id)" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Artista>? listaArtistas;
+    private Artista artistaEnEdicion = new Artista();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarArtistas();
+    }
+
+    private async Task CargarArtistas()
+    {
+        listaArtistas = await Http.GetFromJsonAsync<List<Artista>>("api/artistas");
+    }
+
+    private async Task GuardarArtista()
+    {
+        HttpResponseMessage respuesta;
+
+        if (artistaEnEdicion.Id == 0) // Es nuevo (POST)
+        {
+            respuesta = await Http.PostAsJsonAsync("api/artistas", artistaEnEdicion);
+        }
+        else // Es edición (PUT)
+        {
+            respuesta = await Http.PutAsJsonAsync($"api/artistas/{artistaEnEdicion.Id}", artistaEnEdicion);
+        }
+
+        if (respuesta.IsSuccessStatusCode)
+        {
+            await CargarArtistas();
+            artistaEnEdicion = new Artista(); // Limpiar formulario
+        }
+        else
+        {
+            var mensajeError = await respuesta.Content.ReadAsStringAsync();
+            await JS.InvokeVoidAsync("alert", $"Error al guardar: {mensajeError}");
+        }
+    }
+
+    private void CargarParaEdicion(Artista artista)
+    {
+        // Clonamos el objeto para no editar directamente la lista hasta guardar
+        artistaEnEdicion = new Artista
+        {
+            Id = artista.Id,
+            NombreArtistico = artista.NombreArtistico,
+            NombreCompleto = artista.NombreCompleto,
+            Nacionalidad = artista.Nacionalidad,
+            AnioInicio = artista.AnioInicio,
+            Discografica = artista.Discografica
+        };
+    }
+
+    private async Task EliminarArtista(int id)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", "¿Estás seguro de eliminar este artista?")) return;
+
+        var respuesta = await Http.DeleteAsync($"api/artistas/{id}");
+        if (respuesta.IsSuccessStatusCode)
+        {
+            await CargarArtistas();
+        }
+    }
+
+    private void CancelarEdicion()
+    {
+        artistaEnEdicion = new Artista();
+    }
+}
